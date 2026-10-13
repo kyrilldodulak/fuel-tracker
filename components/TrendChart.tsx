@@ -93,6 +93,15 @@ export function TrendChart({ region, range, averages, networks, fuels, mode, onM
         }.`
       : null;
 
+  const pointCount = rows.filter((r) => lines.some((l) => typeof r[l.key] === "number")).length;
+  const collecting = mode === "fuels" && lines.length > 0 && rows.length > 0 && pointCount < 3;
+  const collectingFrom = collecting
+    ? lines
+        .map((l) => dates[l.col.findIndex((v, i) => v != null && inRange(dates[i], range))])
+        .filter(Boolean)
+        .sort()[0]
+    : undefined;
+
   const dtpCol = mode === "fuels" && fuels.includes("dtp") ? averages.fuels.dtp : undefined;
   const dtpFirst = dtpCol ? averages.dates[dtpCol.findIndex((v) => v != null)] : undefined;
   const dtpNote =
@@ -125,10 +134,15 @@ export function TrendChart({ region, range, averages, networks, fuels, mode, onM
         </label>
       )}
 
-      {note && <p className="note">{note}</p>}
-      {dtpNote && <p className="muted small">{dtpNote}</p>}
+      {!collecting && note && <p className="note">{note}</p>}
+      {!collecting && dtpNote && <p className="muted small">{dtpNote}</p>}
 
-      {lines.length === 0 || rows.length === 0 ? (
+      {collecting ? (
+        <p className="empty">
+          {lines.map((l) => l.label).join(", ")}: історія збирається{collectingFrom ? ` з ${fmtDate(collectingFrom)}` : ""} — графік з’явиться за
+          кілька днів. Поки що оберіть інші види пального або вкладку «Мережі».
+        </p>
+      ) : lines.length === 0 || rows.length === 0 ? (
         <p className="empty">Немає даних для обраних параметрів.</p>
       ) : (
         <>

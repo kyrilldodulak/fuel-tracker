@@ -85,11 +85,15 @@ input[type="date"], select { background: var(--bg); border: 1px solid var(--bord
 .check { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; }
 .check input { width: 18px; height: 18px; accent-color: var(--accent); }
 
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.kpi h3 { margin: 0; color: var(--text-2); font-weight: 600; }
-.kpi-value { font-size: 1.9rem; font-weight: 700; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
-.kpi-deltas { list-style: none; display: flex; flex-direction: column; gap: 3px; font-size: 0.85rem; }
-.kpi-deltas li { display: flex; justify-content: space-between; gap: 8px; }
+.kpis { display: flex; flex-direction: column; border-top: 1px solid var(--grid); }
+.kpi-row { border-bottom: 1px solid var(--grid); }
+.kpi-row > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; padding: 10px 2px; }
+.kpi-row > summary::-webkit-details-marker { display: none; }
+.kpi-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-2); flex: 1 1 auto; min-width: 0; }
+.kpi-value { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi-week { font-size: 0.9rem; font-variant-numeric: tabular-nums; flex: 0 1 100%; text-align: right; }
+.kpi-more { margin: 0 2px 10px; font-size: 0.85rem; }
+@media (min-width: 640px) { .kpi-label { flex: 0 0 180px; } .kpi-value { min-width: 130px; text-align: right; } .kpi-week { flex: 0 0 auto; text-align: left; } }
 
 .delta { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .delta-good { color: var(--good); }
