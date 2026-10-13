@@ -69,7 +69,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
         netFuel={netFuel}
         onNetFuel={setNetFuel}
       />
-      <NetworkComparison region={region} series={networks} names={data.networkNames} fuels={fuels} />
+      <NetworkComparison region={region} series={networks} names={data.networkNames} fuels={fuels} brands={data.brands} />
       <PremiumBrands day={data.brandsDay} brands={data.brands} />
       <PeriodComparison
         region={region}

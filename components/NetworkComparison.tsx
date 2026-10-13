@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { fmtDate, fmtDelta, fmtPrice } from "@/lib/format";
-import { networkLabel, type NetworkSeries } from "@/lib/data";
+import { cheapestPremium, networkLabel, type NetworkBrands, type NetworkSeries } from "@/lib/data";
 import { FUEL_LABELS, TRACKED_NETWORKS, type Fuel, type Region } from "@/lib/types";
 import { FUEL_COLOR, REGION_LABELS } from "./constants";
 
@@ -11,21 +11,29 @@ interface Props {
   series: NetworkSeries;
   names: Record<string, string>;
   fuels: Fuel[];
+  brands: NetworkBrands[];
 }
 
 interface Entry {
   slug: string;
   name: string;
   price: number;
+  /** Brand product name for premium fuels, e.g. "Mustang+". */
+  brand?: string;
 }
 
-function entriesFor(series: NetworkSeries, names: Record<string, string>, fuel: Fuel, all: boolean): Entry[] {
+const PREMIUM_BASE = { dtp: "diesel", a95p: "95" } as const;
+
+function entriesFor(series: NetworkSeries, names: Record<string, string>, fuel: Fuel, all: boolean, brands: NetworkBrands[]): Entry[] {
   const i = series.dates.length - 1;
   const slugs = all ? Object.keys(series.bySlug) : TRACKED_NETWORKS.map((n) => n.slug);
   return slugs
     .flatMap((slug) => {
       const price = series.bySlug[slug]?.[fuel]?.[i];
-      return price != null ? [{ slug, name: networkLabel(slug, names), price }] : [];
+      if (price == null) return [];
+      const base = fuel === "dtp" || fuel === "a95p" ? PREMIUM_BASE[fuel] : null;
+      const item = base ? cheapestPremium(brands.find((b) => b.slug === slug)?.items, base) : null;
+      return [{ slug, name: networkLabel(slug, names), price, brand: item?.price === price ? item.name : undefined }];
     })
     .sort((a, b) => a.price - b.price);
 }
@@ -45,7 +53,9 @@ function FuelBars({ fuel, entries }: { fuel: Fuel; entries: Entry[] }) {
         <ol className="bars">
           {entries.map((e) => (
             <li key={e.slug} className={e.price === min ? "is-min" : undefined}>
-              <span className="bar-name">{e.name}</span>
+              <span className="bar-name" title={e.brand ? `${e.name}: ${e.brand}` : undefined}>
+                {e.name}
+              </span>
               <span className="bar-track" aria-hidden="true">
                 <span className="bar-fill" style={{ width: `${(e.price / max) * 100}%` }} />
               </span>
@@ -59,7 +69,7 @@ function FuelBars({ fuel, entries }: { fuel: Fuel; entries: Entry[] }) {
   );
 }
 
-export function NetworkComparison({ region, series, names, fuels }: Props) {
+export function NetworkComparison({ region, series, names, fuels, brands }: Props) {
   const [all, setAll] = useState(false);
   const day = series.dates.at(-1);
   return (
@@ -78,7 +88,7 @@ export function NetworkComparison({ region, series, names, fuels }: Props) {
       {day ? (
         <div className="bars-grid">
           {fuels.map((f) => (
-            <FuelBars key={f} fuel={f} entries={entriesFor(series, names, f, all)} />
+            <FuelBars key={f} fuel={f} entries={entriesFor(series, names, f, all, brands)} />
           ))}
         </div>
       ) : (

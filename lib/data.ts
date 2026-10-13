@@ -10,6 +10,7 @@ import {
   type BrandsFile,
   type Day,
   type Fuel,
+  type FuelPrices,
   type MetaFile,
   type NetworksFile,
   type Region,
@@ -52,8 +53,45 @@ export const meta = metaRaw as unknown as MetaFile;
 
 const REGIONS: Region[] = ["ua", "kyiv"];
 
+/** Brand-derived fuels: premium diesel (dtp) and premium 95 (a95p), when minfin lacks them. */
+const BRAND_FUELS: { fuel: Fuel; base: BrandPrice["base"] }[] = [
+  { fuel: "dtp", base: "diesel" },
+  { fuel: "a95p", base: "95" },
+];
+
+/** Cheapest premium item of `base` for a network on a day (SOCAR lists two premium diesels). */
+export function cheapestPremium(items: BrandPrice[] | undefined, base: BrandPrice["base"]): BrandPrice | null {
+  const list = (items ?? []).filter((b) => b.premium && b.base === base);
+  return list.length ? list.reduce((a, b) => (b.price < a.price ? b : a)) : null;
+}
+
+/** Averages/networks with missing dtp/a95p filled from network websites (brands.json). Brand prices are national (UPG: Kyiv region). */
+function withBrandFuels(region: Region): { avg: Record<Day, FuelPrices>; net: Record<Day, Record<string, FuelPrices>> } {
+  const avg: Record<Day, FuelPrices> = { ...(averages[region] ?? {}) };
+  const net: Record<Day, Record<string, FuelPrices>> = { ...(networks[region] ?? {}) };
+  for (const day of Object.keys(brands)) {
+    for (const { fuel, base } of BRAND_FUELS) {
+      const tracked: number[] = [];
+      for (const { slug } of TRACKED_NETWORKS) {
+        const price = cheapestPremium(brands[day][slug], base)?.price;
+        if (price == null) continue;
+        if (net[day]) {
+          const cur = net[day][slug] ?? {};
+          if (cur[fuel] == null) net[day] = { ...net[day], [slug]: { ...cur, [fuel]: price } };
+        }
+        tracked.push(net[day]?.[slug]?.[fuel] ?? price);
+      }
+      if (avg[day] && avg[day][fuel] == null && tracked.length) {
+        const m = tracked.reduce((a, b) => a + b, 0) / tracked.length;
+        avg[day] = { ...avg[day], [fuel]: Math.round(m * 100) / 100 };
+      }
+    }
+  }
+  return { avg, net };
+}
+
 function shapeAverages(region: Region): AverageSeries {
-  const byDay = averages[region] ?? {};
+  const byDay = withBrandFuels(region).avg;
   const dates = Object.keys(byDay).sort();
   const fuels: FuelColumns = {};
   for (const f of FUELS) {
@@ -64,7 +102,7 @@ function shapeAverages(region: Region): AverageSeries {
 }
 
 function shapeNetworks(region: Region): NetworkSeries {
-  const byDay = networks[region] ?? {};
+  const byDay = withBrandFuels(region).net;
   const dates = Object.keys(byDay).sort();
   const bySlug: Record<string, FuelColumns> = {};
   dates.forEach((d, i) => {

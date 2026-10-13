@@ -93,6 +93,11 @@ export function TrendChart({ region, range, averages, networks, fuels, mode, onM
         }.`
       : null;
 
+  const dtpCol = mode === "fuels" && fuels.includes("dtp") ? averages.fuels.dtp : undefined;
+  const dtpFirst = dtpCol ? averages.dates[dtpCol.findIndex((v) => v != null)] : undefined;
+  const dtpNote =
+    dtpFirst && range.from < dtpFirst ? `${FUEL_LABELS.dtp}: дані з ${fmtDate(dtpFirst)} — історія накопичується` : null;
+
   return (
     <section className="card" aria-labelledby="trend-h">
       <div className="card-head">
@@ -121,6 +126,7 @@ export function TrendChart({ region, range, averages, networks, fuels, mode, onM
       )}
 
       {note && <p className="note">{note}</p>}
+      {dtpNote && <p className="muted small">{dtpNote}</p>}
 
       {lines.length === 0 || rows.length === 0 ? (
         <p className="empty">Немає даних для обраних параметрів.</p>
