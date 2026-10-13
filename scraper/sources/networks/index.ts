@@ -145,7 +145,6 @@ const minfinOperator = (slug: string) => async () =>
   parseMinfinOperator(await fetchText(`https://index.minfin.com.ua/ua/markets/fuel/tm/${slug}/`));
 
 export const NETWORK_ADAPTERS: Record<string, () => Promise<BrandPrice[]>> = {
-  brsmnafta: minfinOperator("brsmnafta"),
   ukrnafta,
   wog: async () => parseWog(await fetchText("https://wog.ua/ua/fuels/")),
   okko: async () => parseOkko(await fetchText("https://www.okko.ua/fuels")),

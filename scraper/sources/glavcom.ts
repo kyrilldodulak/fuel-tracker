@@ -13,9 +13,6 @@ const ALT_SLUGS: Record<string, string> = {
   wog: "wog",
   socar: "socar",
   ukrnafta: "ukrnafta",
-  "брсм": "brsmnafta",
-  brsm: "brsmnafta",
-  "брсм-нафта": "brsmnafta",
 };
 
 /** Column header → fuel key (А100 is ignored). */

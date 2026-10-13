@@ -14,17 +14,16 @@ describe("glavcom archive parsing", () => {
   });
   it("maps logo alt to slugs and columns to fuels, skipping unknown networks and А100", () => {
     const t = parseGlavcomTable(old);
-    expect(Object.keys(t).sort()).toEqual(["brsmnafta", "okko", "socar", "ukrnafta", "upg", "wog"]);
+    expect(Object.keys(t).sort()).toEqual(["okko", "socar", "ukrnafta", "upg", "wog"]);
     expect(t.okko).toEqual({ a95: 70.99, a95p: 73.99, dt: 75.99, dtp: 78.99, lpg: 41.99 });
     expect(t.upg.dtp).toBe(77.4);
   });
   it("omits missing cells and tolerates trend arrows", () => {
     const t = parseGlavcomTable(old);
     expect(t.ukrnafta.dtp).toBeUndefined();
-    expect(t.brsmnafta).toEqual({ a95: 66.99, dt: 69.99, lpg: 38.49 });
+    expect(t.brsmnafta).toBeUndefined(); // БРСМ is not tracked
     const n = parseGlavcomTable(fx("glavcom-prices.html"));
     expect(n.socar).toMatchObject({ a95: 94.9, dt: 103, dtp: 104 });
-    expect(n.brsmnafta.dtp).toBeUndefined();
   });
   it("picks fuel articles with a date in the slug from a sitemap", () => {
     const xml = [

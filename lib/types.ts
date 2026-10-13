@@ -50,7 +50,6 @@ export const TRACKED_NETWORKS: NetworkInfo[] = [
   { slug: "wog", name: "WOG" },
   { slug: "socar", name: "SOCAR" },
   { slug: "upg", name: "UPG" },
-  { slug: "brsmnafta", name: "БРСМ-Нафта" },
   { slug: "ukrnafta", name: "Укрнафта" },
 ];
 

@@ -19,7 +19,6 @@ export const NETWORK_COLOR: Record<string, string> = {
   wog: "var(--c2)",
   socar: "var(--c3)",
   upg: "var(--c4)",
-  brsmnafta: "var(--c5)",
   ukrnafta: "var(--c6)",
 };
 

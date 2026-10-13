@@ -1,12 +1,13 @@
 import type { Day } from "./types";
 
-export type PeriodKey = "7" | "30" | "90" | "365" | "all" | "custom";
+export type PeriodKey = "7" | "30" | "90" | "365" | "1825" | "all" | "custom";
 
 export const PERIOD_OPTIONS: { key: PeriodKey; label: string }[] = [
   { key: "7", label: "7д" },
   { key: "30", label: "30д" },
   { key: "90", label: "90д" },
   { key: "365", label: "Рік" },
+  { key: "1825", label: "5 років" },
   { key: "all", label: "Усе" },
 ];
 

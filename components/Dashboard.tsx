@@ -26,7 +26,7 @@ const PriceCharts = dynamic(() => import("./PriceCharts").then((m) => m.PriceCha
 export function Dashboard({ data, updated, footer }: { data: DashboardData; updated: string; footer: React.ReactNode }) {
   const [region, setRegion] = useState<Region>("ua");
   const [fuel, setFuel] = useState<Fuel>(DEFAULT_FUEL);
-  const [period, setPeriod] = useState<PeriodKey>("90");
+  const [period, setPeriod] = useState<PeriodKey>("30");
   const [custom, setCustom] = useState<DayRange>({ from: data.firstDay, to: data.today });
   const [cmp, setCmp] = useState(() => defaultComparison(data.today));
   const [discounts, setDiscount] = useDiscounts();
