@@ -1,0 +1,33 @@
+@AGENTS.md
+
+# Fuel tracker (UA)
+
+Публичный дашборд цен на топливо в Украине: А-95 / А-95 преміум / ДП / ДП преміум (+А-92, газ), сравнение сетей и динамика за период. UI на **украинском**. Регионы: вся Украина + Київська обл. Деплой — статикой на Vercel (Hobby, бесплатно).
+
+## Архитектура
+- **Нет бэкенда/БД.** GitHub Actions (`.github/workflows/scrape.yml`, 2×/день) запускает скрейпер → коммитит `data/*.json` → Vercel пересобирает Next.js; страница `/` пререндерится статически (JSON импортируется на этапе сборки, `lib/data.ts`). `output: "export"` не нужен — Vercel собирает Next нативно.
+- `lib/types.ts` — общая модель данных (скрейпер и фронт). `TRACKED_NETWORKS` — отслеживаемые сети (minfin-слаги).
+- `scraper/index.ts` — оркестратор. Каждый источник изолирован через `run()`: ошибка → `data/meta.json` + `::warning::`, процесс не падает.
+- `npm run scrape` — ежедневный сбор; `npm run backfill` — разово: архив средних по UA с 2015-06 + ~3 мес. истории по сетям и Київській обл. (из SVG-графиков minfin). `npm test` — vitest на фикстурах `scraper/__fixtures__/`.
+
+## Источники
+- **index.minfin.com.ua/markets/fuel/** (данные Консалтингова група А-95):
+  - `/` — средние по UA (таблица `table.line`); `/YYYY-MM/` — месячный архив (`table.zebra`, есть колонка ДТ+, часто пустая).
+  - `/tm/` — по ~36 сетям (`table.zebra`, ссылки `/markets/fuel/tm/<slug>/`), только текущий день.
+  - `/reg/kievskaya/` — средние + сети по Київській обл. (Киев не отдельно).
+  - `/tm/<slug>/` и регион-страницы содержат `svg.inc.php?indKey=...` — в SVG ~67 дней истории в `sh(...,'DD.MM.YYYY v1 v2 v3')`, порядок серий — в `<g id="hintbox">`.
+- **Сайты сетей** (брендовые премиум-линейки, `data/brands.json`), `scraper/sources/networks/index.ts`:
+  - WOG `wog.ua/ua/fuels/` — HTML-карточки `s_fuel_item` (Mustang, Mustang+).
+  - OKKO `okko.ua/fuels` — `window.__NUXT__` (выполняется в `node:vm`), объекты `{fuel_code, price}` (Pulls 95/100/Diesel).
+  - SOCAR `socar.ua/fuel` — заголовки `two-image-and-content__title` + «Ціна: N грн» (Nano). Обычного ДП на сайте нет.
+  - UPG `upg.ua/cini-na-palne/` — inline `var obj = {data:[{RegionName, Title, AveragePrice}]}`, берём «Київська».
+  - БРСМ-Нафта, Укрнафта — свои сайты за Cloudflare (403) → фолбэк на `minfin /ua/markets/fuel/tm/<slug>/`.
+  - **Shell в Украине больше нет** — не добавлять.
+- Премиум: храним **брендовые названия как есть** + `base` (95/100/diesel/…) + `premium` флаг (`scraper/normalize.ts`).
+
+## Конвенции
+- Даты — `YYYY-MM-DD` по Киеву; повторный сбор в тот же день перезаписывает день (свежие данные выигрывают); backfill не перезаписывает существующие дни.
+- JSON пишется с отсортированными ключами (минимальные диффы).
+- `package.json` — `"type": "module"`; скрейпер запускается через `tsx`.
+- Shell: в этом окружении zsh — циклы с разбиением слов оборачивать в `bash -c`.
+- Для поиска/исследования (новые источники, селекторы) — делегировать Sonnet-сабагентам, чтобы экономить токены.
