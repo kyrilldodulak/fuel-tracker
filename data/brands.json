@@ -99,15 +99,27 @@
   "ukrnafta": [
    {
     "base": "95",
-    "name": "А-95 преміум",
+    "name": "А-95",
+    "premium": false,
+    "price": 88.9
+   },
+   {
+    "base": "95",
+    "name": "А-95+",
     "premium": true,
     "price": 91.9
    },
    {
-    "base": "95",
-    "name": "А-95",
+    "base": "diesel",
+    "name": "ДП",
     "premium": false,
-    "price": 88.9
+    "price": 97.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП+",
+    "premium": true,
+    "price": 99.9
    },
    {
     "base": "92",
@@ -116,14 +128,8 @@
     "price": 86.9
    },
    {
-    "base": "diesel",
-    "name": "Дизельне паливо",
-    "premium": false,
-    "price": 97.9
-   },
-   {
     "base": "lpg",
-    "name": "Газ автомобільний",
+    "name": "Газ",
     "premium": false,
     "price": 44.9
    }

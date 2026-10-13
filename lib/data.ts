@@ -170,3 +170,34 @@ export function valueAtOrBefore(dates: Day[], col: Column, day: Day): number | n
   }
   return null;
 }
+
+export interface PriceEntry {
+  slug: string;
+  name: string;
+  /** Shelf price today, null when the network lacks this fuel. */
+  price: number | null;
+  /** Brand product name for premium fuels, e.g. "Mustang+". */
+  brand?: string;
+}
+
+const PREMIUM_BASE: Partial<Record<Fuel, BrandPrice["base"]>> = { dtp: "diesel", a95p: "95" };
+
+/** Latest shelf prices of `fuel` per network (tracked ones always listed, others only with `all`). */
+export function priceEntries(
+  series: NetworkSeries,
+  names: Record<string, string>,
+  fuel: Fuel,
+  all: boolean,
+  brands: NetworkBrands[],
+): PriceEntry[] {
+  const i = series.dates.length - 1;
+  const tracked = TRACKED_NETWORKS.map((n) => n.slug);
+  const slugs = all ? [...tracked, ...Object.keys(series.bySlug).filter((s) => !tracked.includes(s))] : tracked;
+  const base = PREMIUM_BASE[fuel];
+  return slugs.flatMap((slug) => {
+    const price = series.bySlug[slug]?.[fuel]?.[i] ?? null;
+    if (price == null && !tracked.includes(slug)) return [];
+    const item = base && price != null ? cheapestPremium(brands.find((b) => b.slug === slug)?.items, base) : null;
+    return [{ slug, name: networkLabel(slug, names), price, brand: item?.price === price ? item.name : undefined }];
+  });
+}

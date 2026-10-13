@@ -22,6 +22,7 @@
   - SOCAR `socar.ua/fuel` — заголовки `two-image-and-content__title` + «Ціна: N грн» (Nano). Обычного ДП на сайте нет.
   - UPG `upg.ua/cini-na-palne/` — inline `var obj = {data:[{RegionName, Title, AveragePrice}]}`, берём «Київська».
   - БРСМ-Нафта, Укрнафта — свои сайты за Cloudflare (403) → фолбэк на `minfin /ua/markets/fuel/tm/<slug>/`.
+  - Укрнафта ДП+ (премиум-дизель) есть только в ежедневной статье Главкома «Ціни на АЗС <дата>» (таблица, строка по `alt="UKRNAFTA"`); URL статьи ищется на `glavcom.ua/economics/personal-money/`. Хрупко: при поломке адаптер молча падает на minfin (без ДП+).
   - **Shell в Украине больше нет** — не добавлять.
 - Премиум: храним **брендовые названия как есть** + `base` (95/100/diesel/…) + `premium` флаг (`scraper/normalize.ts`).
 

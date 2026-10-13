@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { parseMinfinOperator, parseOkko, parseSocar, parseUpg, parseWog } from "./sources/networks";
+import { glavcomArticleUrls, mergeBrandPrices, parseGlavcomNetwork, parseMinfinOperator, parseOkko, parseSocar, parseUpg, parseWog } from "./sources/networks";
 
 const fx = (f: string) => fs.readFileSync(path.join(import.meta.dirname, "__fixtures__", f), "utf8");
 const by = (items: { name: string }[], name: string) => items.find((i) => i.name === name);
@@ -98,5 +98,26 @@ describe("parseMinfinOperator", () => {
   });
   it("returns [] when there is no table.line", () => {
     expect(parseMinfinOperator(fx("wog.html"))).toEqual([]);
+  });
+});
+
+describe("ukrnafta via glavcom", () => {
+  it("parses Ukrnafta row incl. premium diesel ДП+", () => {
+    const r = parseGlavcomNetwork(fx("glavcom-prices.html"));
+    const dp = r.find((b) => b.base === "diesel" && b.premium);
+    expect(dp).toMatchObject({ name: "ДП+", price: 99.9 });
+    expect(r.find((b) => b.base === "diesel" && !b.premium)?.price).toBe(97.9);
+    expect(r.find((b) => b.base === "lpg")?.price).toBe(44.9);
+  });
+  it("finds newest article url first", () => {
+    const urls = glavcomArticleUrls(fx("glavcom-list.html"));
+    expect(urls[0]).toMatch(/1148776\.html$/);
+  });
+  it("merges with minfin fallback, primary wins", () => {
+    const g = parseGlavcomNetwork(fx("glavcom-prices.html"));
+    const m = parseMinfinOperator(fx("minfin-ukrnafta-tm.html"));
+    const merged = mergeBrandPrices(g, m);
+    expect(merged.filter((b) => b.base === "95" && b.premium)).toHaveLength(1);
+    expect(merged.some((b) => b.base === "diesel" && b.premium)).toBe(true);
   });
 });

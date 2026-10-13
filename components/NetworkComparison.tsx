@@ -1,98 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { fmtDate, fmtDelta, fmtPrice } from "@/lib/format";
-import { cheapestPremium, networkLabel, type NetworkBrands, type NetworkSeries } from "@/lib/data";
-import { FUEL_LABELS, TRACKED_NETWORKS, type Fuel, type Region } from "@/lib/types";
-import { FUEL_COLOR, REGION_LABELS } from "./constants";
+import { fmtDate, fmtPrice } from "@/lib/format";
+import { discountAmount, type Discounts } from "@/lib/discounts";
+import type { PriceEntry } from "@/lib/data";
+import { FUEL_LABELS, type Fuel, type Region } from "@/lib/types";
+import { REGION_LABELS } from "./constants";
+
+export interface PricedEntry extends PriceEntry {
+  price: number;
+  /** Effective price after the user's discount. */
+  eff: number;
+  discount: number;
+}
+
+/** Split entries into priced (sorted by effective price) and those without data. */
+export function applyDiscounts(entries: PriceEntry[], discounts: Discounts): { priced: PricedEntry[]; missing: PriceEntry[] } {
+  const priced: PricedEntry[] = [];
+  const missing: PriceEntry[] = [];
+  for (const e of entries) {
+    if (e.price == null) {
+      missing.push(e);
+      continue;
+    }
+    const discount = discountAmount(e.price, discounts[e.slug]);
+    priced.push({ ...e, price: e.price, discount, eff: Math.round((e.price - discount) * 100) / 100 });
+  }
+  priced.sort((a, b) => a.eff - b.eff);
+  return { priced, missing };
+}
 
 interface Props {
+  fuel: Fuel;
   region: Region;
-  series: NetworkSeries;
-  names: Record<string, string>;
-  fuels: Fuel[];
-  brands: NetworkBrands[];
+  day: string | undefined;
+  priced: PricedEntry[];
+  missing: PriceEntry[];
+  all: boolean;
+  onAll: (v: boolean) => void;
 }
 
-interface Entry {
-  slug: string;
-  name: string;
-  price: number;
-  /** Brand product name for premium fuels, e.g. "Mustang+". */
-  brand?: string;
+/** Bar length relative to the min..max range so differences stay visible. */
+function barWidth(eff: number, min: number, max: number): number {
+  return max > min ? 12 + (88 * (eff - min)) / (max - min) : 12;
 }
 
-const PREMIUM_BASE = { dtp: "diesel", a95p: "95" } as const;
-
-function entriesFor(series: NetworkSeries, names: Record<string, string>, fuel: Fuel, all: boolean, brands: NetworkBrands[]): Entry[] {
-  const i = series.dates.length - 1;
-  const slugs = all ? Object.keys(series.bySlug) : TRACKED_NETWORKS.map((n) => n.slug);
-  return slugs
-    .flatMap((slug) => {
-      const price = series.bySlug[slug]?.[fuel]?.[i];
-      if (price == null) return [];
-      const base = fuel === "dtp" || fuel === "a95p" ? PREMIUM_BASE[fuel] : null;
-      const item = base ? cheapestPremium(brands.find((b) => b.slug === slug)?.items, base) : null;
-      return [{ slug, name: networkLabel(slug, names), price, brand: item?.price === price ? item.name : undefined }];
-    })
-    .sort((a, b) => a.price - b.price);
-}
-
-function FuelBars({ fuel, entries }: { fuel: Fuel; entries: Entry[] }) {
-  const min = entries[0]?.price;
-  const max = entries.at(-1)?.price ?? 0;
-  return (
-    <div className="bars-block">
-      <h3>
-        <i className="swatch" style={{ background: FUEL_COLOR[fuel] }} aria-hidden="true" />
-        {FUEL_LABELS[fuel]}
-      </h3>
-      {entries.length === 0 ? (
-        <p className="empty">Немає даних.</p>
-      ) : (
-        <ol className="bars">
-          {entries.map((e) => (
-            <li key={e.slug} className={e.price === min ? "is-min" : undefined}>
-              <span className="bar-name" title={e.brand ? `${e.name}: ${e.brand}` : undefined}>
-                {e.name}
-              </span>
-              <span className="bar-track" aria-hidden="true">
-                <span className="bar-fill" style={{ width: `${(e.price / max) * 100}%` }} />
-              </span>
-              <b className="bar-price">{fmtPrice(e.price)}</b>
-              <span className="bar-diff muted">{e.price === min ? "найдешевше" : fmtDelta(e.price - (min ?? e.price))}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </div>
-  );
-}
-
-export function NetworkComparison({ region, series, names, fuels, brands }: Props) {
-  const [all, setAll] = useState(false);
-  const day = series.dates.at(-1);
+export function NetworkComparison({ fuel, region, day, priced, missing, all, onAll }: Props) {
+  const min = priced[0]?.eff ?? 0;
+  const max = priced.at(-1)?.eff ?? 0;
   return (
     <section className="card" aria-labelledby="nets-h">
       <div className="card-head">
         <h2 id="nets-h">Де дешевше зараз</h2>
         <label className="check">
-          <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} />
+          <input type="checkbox" checked={all} onChange={(e) => onAll(e.target.checked)} />
           усі мережі
         </label>
       </div>
       <p className="muted small">
-        {REGION_LABELS[region]}
-        {day ? `, станом на ${fmtDate(day)}` : ""}. Від найдешевшої мережі.
+        {FUEL_LABELS[fuel]}, {REGION_LABELS[region]}
+        {day ? `, станом на ${fmtDate(day)}` : ""}. Довжина смуги — відносно найдешевшої.
       </p>
-      {day ? (
-        <div className="bars-grid">
-          {fuels.map((f) => (
-            <FuelBars key={f} fuel={f} entries={entriesFor(series, names, f, all, brands)} />
-          ))}
-        </div>
+      {priced.length === 0 ? (
+        <p className="empty">Немає даних.</p>
       ) : (
-        <p className="empty">Немає даних по мережах.</p>
+        <ol className="bars">
+          {priced.map((e) => (
+            <li key={e.slug} className={e.eff === min ? "is-min" : undefined}>
+              <span className="bar-name" title={e.brand ? `${e.name}: ${e.brand}` : undefined}>
+                {e.name}
+              </span>
+              <span className="bar-track" aria-hidden="true">
+                <span className="bar-fill" style={{ width: `${barWidth(e.eff, min, max)}%` }} />
+              </span>
+              <span className="bar-price">
+                <b>{fmtPrice(e.eff)}</b>
+                {e.discount > 0 && (
+                  <span className="bar-orig muted">
+                    <s>{fmtPrice(e.price)}</s> −{fmtPrice(e.discount)} знижка
+                  </span>
+                )}
+              </span>
+              <span className="bar-diff muted">{e.eff === min ? "найдешевше" : `+${fmtPrice(e.eff - min)} від найдешевшої`}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {missing.length > 0 && (
+        <ul className="bars-missing muted">
+          {missing.map((e) => (
+            <li key={e.slug}>
+              <span>{e.name}</span>
+              <span>немає даних</span>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );

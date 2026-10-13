@@ -1,8 +1,8 @@
 import type { Fuel, Region } from "@/lib/types";
 
 /** Display order of fuels. */
-export const FUEL_ORDER: Fuel[] = ["a95", "a95p", "dt", "dtp", "a92", "lpg"];
-export const DEFAULT_FUELS: Fuel[] = ["dtp"];
+export const FUEL_ORDER: Fuel[] = ["dtp", "dt", "a95p", "a95", "a92", "lpg"];
+export const DEFAULT_FUEL: Fuel = "dtp";
 
 /** Fixed colour per entity (CSS variables defined in globals.css). */
 export const FUEL_COLOR: Record<Fuel, string> = {

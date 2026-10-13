@@ -1,50 +1,47 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { DashboardData } from "@/lib/data";
-import { defaultComparison, inRange, presetRange, type DayRange, type PeriodKey } from "@/lib/period";
+import { useState } from "react";
+import { priceEntries, type DashboardData } from "@/lib/data";
+import { defaultComparison, presetRange, type DayRange, type PeriodKey } from "@/lib/period";
 import type { Fuel, Region } from "@/lib/types";
-import { DEFAULT_FUELS, FUEL_ORDER } from "./constants";
+import { DEFAULT_FUEL } from "./constants";
+import { DiscountsCard } from "./Discounts";
 import { Filters } from "./Filters";
-import { KpiTiles } from "./KpiTiles";
-import { NetworkComparison } from "./NetworkComparison";
+import { Hero } from "./Hero";
+import { applyDiscounts, NetworkComparison } from "./NetworkComparison";
 import { PeriodComparison } from "./PeriodComparison";
 import { PremiumBrands } from "./PremiumBrands";
-import { TrendChart, type ChartMode } from "./TrendChart";
+import { PriceCharts } from "./PriceCharts";
+import { useDiscounts } from "./useDiscounts";
 
 export function Dashboard({ data }: { data: DashboardData }) {
   const [region, setRegion] = useState<Region>("ua");
+  const [fuel, setFuel] = useState<Fuel>(DEFAULT_FUEL);
   const [period, setPeriod] = useState<PeriodKey>("90");
   const [custom, setCustom] = useState<DayRange>({ from: data.firstDay, to: data.today });
-  const [picked, setPicked] = useState<Fuel[]>(DEFAULT_FUELS);
-  const [mode, setMode] = useState<ChartMode>("fuels");
-  const [netFuelState, setNetFuel] = useState<Fuel>("a95");
+  const [all, setAll] = useState(false);
   const [cmp, setCmp] = useState(() => defaultComparison(data.today));
+  const [discounts, setDiscount] = useDiscounts();
 
   const bounds: DayRange = { from: data.firstDay, to: data.today };
   const range = period === "custom" ? custom : presetRange(period, data.today, data.firstDay);
   const averages = data.averages[region];
   const networks = data.networks[region];
 
-  // Hide fuels (e.g. ДП преміум) with no data in the selected range.
-  const fuelOptions = useMemo(
-    () =>
-      FUEL_ORDER.filter((f) => {
-        const col = averages.fuels[f];
-        return col?.some((v, i) => v != null && inRange(averages.dates[i], range));
-      }),
-    [averages, range],
-  );
-  const fuels = FUEL_ORDER.filter((f) => picked.includes(f) && fuelOptions.includes(f));
-  const netFuel = fuels.includes(netFuelState) ? netFuelState : (fuels[0] ?? "a95");
-
-  const toggleFuel = (f: Fuel) => setPicked((cur) => (cur.includes(f) ? cur.filter((x) => x !== f) : [...cur, f]));
+  const entries = priceEntries(networks, data.networkNames, fuel, all, data.brands);
+  const { priced, missing } = applyDiscounts(entries, discounts);
 
   return (
     <>
-      <Filters
+      <Filters region={region} onRegion={setRegion} fuel={fuel} onFuel={setFuel} />
+      <DiscountsCard discounts={discounts} onChange={setDiscount} />
+      <Hero fuel={fuel} region={region} best={priced[0]} averages={averages} />
+      <NetworkComparison fuel={fuel} region={region} day={networks.dates.at(-1)} priced={priced} missing={missing} all={all} onAll={setAll} />
+      <PriceCharts
+        fuel={fuel}
         region={region}
-        onRegion={setRegion}
+        averages={averages}
+        networks={networks}
         period={period}
         onPeriod={setPeriod}
         range={range}
@@ -53,30 +50,14 @@ export function Dashboard({ data }: { data: DashboardData }) {
           setCustom(r);
           setPeriod("custom");
         }}
-        fuels={fuels}
-        fuelOptions={fuelOptions}
-        onToggleFuel={toggleFuel}
       />
-      <KpiTiles series={averages} fuels={fuels} />
-      <TrendChart
-        region={region}
-        range={range}
-        averages={averages}
-        networks={networks}
-        fuels={fuels}
-        mode={mode}
-        onMode={setMode}
-        netFuel={netFuel}
-        onNetFuel={setNetFuel}
-      />
-      <NetworkComparison region={region} series={networks} names={data.networkNames} fuels={fuels} brands={data.brands} />
       <PremiumBrands day={data.brandsDay} brands={data.brands} />
       <PeriodComparison
         region={region}
         averages={averages}
         networks={networks}
         names={data.networkNames}
-        fuels={fuels}
+        fuel={fuel}
         a={cmp.a}
         b={cmp.b}
         onA={(a) => setCmp((c) => ({ ...c, a }))}

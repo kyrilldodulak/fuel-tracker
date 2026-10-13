@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { fmtDate, fmtPrice } from "@/lib/format";
 import { inRange, mean, type DayRange } from "@/lib/period";
 import { networkLabel, type AverageSeries, type Column, type NetworkSeries } from "@/lib/data";
@@ -13,7 +12,7 @@ interface Props {
   averages: AverageSeries;
   networks: NetworkSeries;
   names: Record<string, string>;
-  fuels: Fuel[];
+  fuel: Fuel;
   a: DayRange;
   b: DayRange;
   onA: (r: DayRange) => void;
@@ -75,63 +74,41 @@ function CompareTable({ rows, first, aLabel, bLabel }: { rows: RowData[]; first:
   );
 }
 
-export function PeriodComparison({ region, averages, networks, names, fuels, a, b, onA, onB }: Props) {
-  const [netFuel, setNetFuel] = useState<Fuel | null>(null);
-  const nf = netFuel && fuels.includes(netFuel) ? netFuel : fuels[0];
-
-  const fuelRows: RowData[] = fuels.map((f) => ({
-    key: f,
-    label: FUEL_LABELS[f],
-    a: avgOver(averages.dates, averages.fuels[f], a),
-    b: avgOver(averages.dates, averages.fuels[f], b),
-  }));
-  const netRows: RowData[] = nf
-    ? TRACKED_NETWORKS.map((n) => ({
-        key: n.slug,
-        label: networkLabel(n.slug, names),
-        a: avgOver(networks.dates, networks.bySlug[n.slug]?.[nf], a),
-        b: avgOver(networks.dates, networks.bySlug[n.slug]?.[nf], b),
-      }))
-    : [];
+export function PeriodComparison({ region, averages, networks, names, fuel, a, b, onA, onB }: Props) {
+  const rows: RowData[] = [
+    {
+      key: "avg",
+      label: `Середнє, ${REGION_LABELS[region]}`,
+      a: avgOver(averages.dates, averages.fuels[fuel], a),
+      b: avgOver(averages.dates, averages.fuels[fuel], b),
+    },
+    ...TRACKED_NETWORKS.map((n) => ({
+      key: n.slug,
+      label: networkLabel(n.slug, names),
+      a: avgOver(networks.dates, networks.bySlug[n.slug]?.[fuel], a),
+      b: avgOver(networks.dates, networks.bySlug[n.slug]?.[fuel], b),
+    })),
+  ];
   const aLabel = `A: ${fmtDate(a.from)} – ${fmtDate(a.to)}`;
   const bLabel = `B: ${fmtDate(b.from)} – ${fmtDate(b.to)}`;
   const netStart = networks.dates[0];
 
   return (
-    <section className="card" aria-labelledby="cmp-h">
-      <h2 id="cmp-h">Порівняння періодів</h2>
-      <p className="muted small">Середні ціни за період. {REGION_LABELS[region]}. Типово — останні 30 днів проти попередніх 30.</p>
+    <details className="card fold" aria-label="Порівняння періодів">
+      <summary>
+        <h2>Порівняння періодів</h2>
+      </summary>
+      <p className="muted small">
+        {FUEL_LABELS[fuel]}, середні ціни за період. {REGION_LABELS[region]}. Типово — останні 30 днів проти попередніх 30.
+      </p>
       <div className="range-row">
         <RangeInputs label="Період A" r={a} onChange={onA} />
         <RangeInputs label="Період B" r={b} onChange={onB} />
       </div>
-
-      {fuels.length === 0 ? (
-        <p className="empty">Оберіть хоча б один вид пального.</p>
-      ) : (
-        <>
-          <h3>Вид пального (середнє по регіону)</h3>
-          <CompareTable rows={fuelRows} first="Пальне" aLabel={aLabel} bLabel={bLabel} />
-
-          <div className="card-head sub">
-            <h3>Мережі</h3>
-            <label className="inline-select">
-              <span className="muted">Пальне:</span>
-              <select value={nf} onChange={(e) => setNetFuel(e.target.value as Fuel)}>
-                {fuels.map((f) => (
-                  <option key={f} value={f}>
-                    {FUEL_LABELS[f]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {netStart && (a.from < netStart || b.from < netStart) && (
-            <p className="note">Історія по мережах є лише з {fmtDate(netStart)}; для раніших періодів — «—».</p>
-          )}
-          <CompareTable rows={netRows} first="Мережа" aLabel={aLabel} bLabel={bLabel} />
-        </>
+      {netStart && (a.from < netStart || b.from < netStart) && (
+        <p className="note">Історія по мережах є лише з {fmtDate(netStart)}; для раніших періодів — «—».</p>
       )}
-    </section>
+      <CompareTable rows={rows} first="Мережа" aLabel={aLabel} bLabel={bLabel} />
+    </details>
   );
 }

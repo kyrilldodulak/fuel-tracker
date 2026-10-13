@@ -85,12 +85,68 @@ export function parseMinfinOperator(html: string): BrandPrice[] {
   );
 }
 
+/**
+ * glavcom.ua daily "Ціни на АЗС <date>" article: table with a row per network (logo `alt="UKRNAFTA"`)
+ * and columns А95 / А95+ / ДП / ДП+ / А100 / А92 / Газ. Gives Ukrnafta's premium diesel (ДП+),
+ * which minfin and the Cloudflare-protected ukrnafta.com don't expose.
+ */
+export function parseGlavcomNetwork(html: string, alt = "UKRNAFTA"): BrandPrice[] {
+  const $ = cheerio.load(html);
+  for (const table of $("table").toArray()) {
+    const heads = $(table)
+      .find("thead th")
+      .toArray()
+      .map((th) => $(th).text().trim());
+    const row = $(table)
+      .find("tbody tr")
+      .toArray()
+      .find((tr) => $(tr).find(`img[alt='${alt}']`).length > 0);
+    if (!row || heads.length < 2) continue;
+    const cells = $(row).find("td").toArray().slice(1);
+    const names: Record<string, string> = { "А95": "А-95", "А95+": "А-95+", "А100": "А-100", "А92": "А-92" };
+    return classifyAll(cells.map((td, i) => [names[heads[i + 1]] ?? heads[i + 1], parsePrice($(td).text())]));
+  }
+  throw new Error(`glavcom: row ${alt} not found`);
+}
+
+/** Newest glavcom "ціни на АЗС" article URLs from the section page (highest numeric id first). */
+export function glavcomArticleUrls(listHtml: string): string[] {
+  const hrefs = [...listHtml.matchAll(/href="(\/economics\/personal-money\/[^"]*-na-(?:azs|palne)-[^"]*?-(\d+)\.html)"/g)];
+  return [...new Map(hrefs.map((m) => [m[1], Number(m[2])])).entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([h]) => `https://glavcom.ua${h}`);
+}
+
+/** Merge by (base, premium): `primary` wins, `fallback` fills in what's missing. */
+export function mergeBrandPrices(primary: BrandPrice[], fallback: BrandPrice[]): BrandPrice[] {
+  const key = (b: BrandPrice) => `${b.base}|${b.premium}`;
+  const have = new Set(primary.map(key));
+  return [...primary, ...fallback.filter((b) => !have.has(key(b)))];
+}
+
+async function ukrnafta(): Promise<BrandPrice[]> {
+  const base = await minfinOperator("ukrnafta")();
+  try {
+    const urls = glavcomArticleUrls(await fetchText("https://glavcom.ua/economics/personal-money/")).slice(0, 3);
+    for (const url of urls) {
+      try {
+        return mergeBrandPrices(parseGlavcomNetwork(await fetchText(url)), base);
+      } catch {
+        /* try the previous article */
+      }
+    }
+  } catch {
+    /* glavcom unavailable → minfin only */
+  }
+  return base;
+}
+
 const minfinOperator = (slug: string) => async () =>
   parseMinfinOperator(await fetchText(`https://index.minfin.com.ua/ua/markets/fuel/tm/${slug}/`));
 
 export const NETWORK_ADAPTERS: Record<string, () => Promise<BrandPrice[]>> = {
   brsmnafta: minfinOperator("brsmnafta"),
-  ukrnafta: minfinOperator("ukrnafta"),
+  ukrnafta,
   wog: async () => parseWog(await fetchText("https://wog.ua/ua/fuels/")),
   okko: async () => parseOkko(await fetchText("https://www.okko.ua/fuels")),
   socar: async () => parseSocar(await fetchText("https://socar.ua/fuel")),
