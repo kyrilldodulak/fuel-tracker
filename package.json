@@ -9,6 +9,7 @@
     "lint": "eslint",
     "scrape": "tsx scraper/index.ts",
     "backfill": "tsx scraper/index.ts --backfill",
+    "backfill:glavcom": "tsx scraper/index.ts --backfill-glavcom",
     "test": "vitest run"
   },
   "dependencies": {

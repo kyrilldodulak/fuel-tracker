@@ -12,21 +12,24 @@ interface Props {
 
 export function Filters({ region, onRegion, fuel, onFuel }: Props) {
   return (
-    <section className="card filters" aria-label="Регіон і пальне">
-      <div className="seg" role="group" aria-label="Регіон">
-        {(Object.keys(REGION_LABELS) as Region[]).map((r) => (
-          <button key={r} type="button" aria-pressed={region === r} onClick={() => onRegion(r)}>
-            {REGION_LABELS[r]}
-          </button>
-        ))}
-      </div>
-      <div className="chips" role="radiogroup" aria-label="Пальне">
+    <div className="controls">
+      <div className="seg" role="radiogroup" aria-label="Пальне">
         {FUEL_ORDER.map((f) => (
-          <button key={f} type="button" role="radio" aria-checked={fuel === f} className="chip" onClick={() => onFuel(f)}>
+          <button key={f} type="button" role="radio" aria-checked={fuel === f} onClick={() => onFuel(f)}>
             {FUEL_LABELS[f]}
           </button>
         ))}
       </div>
-    </section>
+      <label className="region">
+        <span className="visually-hidden">Регіон</span>
+        <select value={region} onChange={(e) => onRegion(e.target.value as Region)}>
+          {(Object.keys(REGION_LABELS) as Region[]).map((r) => (
+            <option key={r} value={r}>
+              {REGION_LABELS[r]}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
   );
 }

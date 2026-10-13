@@ -12,7 +12,7 @@ interface Props {
 
 export function PeriodControls({ period, onPeriod, range, bounds, onCustom }: Props) {
   return (
-    <div className="filter-row">
+    <div className="period">
       <div className="chips" role="group" aria-label="Період">
         {PERIOD_OPTIONS.map((o) => (
           <button key={o.key} type="button" className="chip" aria-pressed={period === o.key} onClick={() => onPeriod(o.key)}>
@@ -20,28 +20,31 @@ export function PeriodControls({ period, onPeriod, range, bounds, onCustom }: Pr
           </button>
         ))}
       </div>
-      <div className="daterange">
-        <label>
-          <span>від</span>
-          <input
-            type="date"
-            value={range.from}
-            min={bounds.from}
-            max={range.to}
-            onChange={(e) => e.target.value && onCustom({ from: e.target.value, to: range.to })}
-          />
-        </label>
-        <label>
-          <span>до</span>
-          <input
-            type="date"
-            value={range.to}
-            min={range.from}
-            max={bounds.to}
-            onChange={(e) => e.target.value && onCustom({ from: range.from, to: e.target.value })}
-          />
-        </label>
-      </div>
+      <details className="inline-fold">
+        <summary className="small muted">свій період</summary>
+        <div className="daterange">
+          <label>
+            <span>від</span>
+            <input
+              type="date"
+              value={range.from}
+              min={bounds.from}
+              max={range.to}
+              onChange={(e) => e.target.value && onCustom({ from: e.target.value, to: range.to })}
+            />
+          </label>
+          <label>
+            <span>до</span>
+            <input
+              type="date"
+              value={range.to}
+              min={range.from}
+              max={bounds.to}
+              onChange={(e) => e.target.value && onCustom({ from: range.from, to: e.target.value })}
+            />
+          </label>
+        </div>
+      </details>
     </div>
   );
 }

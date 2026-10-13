@@ -6,6 +6,7 @@ import { networkLabel, type AverageSeries, type Column, type NetworkSeries } fro
 import { FUEL_LABELS, TRACKED_NETWORKS, type Fuel, type Region } from "@/lib/types";
 import { Delta, changeOf } from "./Delta";
 import { REGION_LABELS } from "./constants";
+import { Fold } from "./Fold";
 
 interface Props {
   region: Region;
@@ -94,10 +95,7 @@ export function PeriodComparison({ region, averages, networks, names, fuel, a, b
   const netStart = networks.dates[0];
 
   return (
-    <details className="card fold" aria-label="Порівняння періодів">
-      <summary>
-        <h2>Порівняння періодів</h2>
-      </summary>
+    <Fold title="Порівняння періодів">
       <p className="muted small">
         {FUEL_LABELS[fuel]}, середні ціни за період. {REGION_LABELS[region]}. Типово — останні 30 днів проти попередніх 30.
       </p>
@@ -109,6 +107,6 @@ export function PeriodComparison({ region, averages, networks, names, fuel, a, b
         <p className="note">Історія по мережах є лише з {fmtDate(netStart)}; для раніших періодів — «—».</p>
       )}
       <CompareTable rows={rows} first="Мережа" aLabel={aLabel} bLabel={bLabel} />
-    </details>
+    </Fold>
   );
 }

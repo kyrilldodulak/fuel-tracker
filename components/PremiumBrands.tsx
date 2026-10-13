@@ -1,6 +1,7 @@
 import { fmtDate, fmtPrice } from "@/lib/format";
 import { cheapestPremium, type NetworkBrands } from "@/lib/data";
 import type { BrandPrice } from "@/lib/types";
+import { Fold } from "./Fold";
 
 interface Props {
   day: string | null;
@@ -70,8 +71,7 @@ export function PremiumBrands({ day, brands }: Props) {
     .filter((x): x is { n: NetworkBrands; item: BrandPrice } => x.item != null);
 
   return (
-    <section className="card" aria-labelledby="brands-h">
-      <h2 id="brands-h">Преміум-лінійки мереж</h2>
+    <Fold title="Преміум-лінійки мереж">
       <p className="muted small">
         Ціни з сайтів мереж{day ? ` на ${fmtDate(day)}` : ""}. Під ціною — бренд і націнка до звичайного.
       </p>
@@ -128,6 +128,6 @@ export function PremiumBrands({ day, brands }: Props) {
           </ul>
         </details>
       )}
-    </section>
+    </Fold>
   );
 }

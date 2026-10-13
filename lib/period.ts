@@ -1,13 +1,12 @@
 import type { Day } from "./types";
 
-export type PeriodKey = "7" | "30" | "90" | "365" | "1825" | "all" | "custom";
+export type PeriodKey = "7" | "30" | "90" | "365" | "all" | "custom";
 
 export const PERIOD_OPTIONS: { key: PeriodKey; label: string }[] = [
   { key: "7", label: "7д" },
   { key: "30", label: "30д" },
   { key: "90", label: "90д" },
   { key: "365", label: "Рік" },
-  { key: "1825", label: "5 років" },
   { key: "all", label: "Усе" },
 ];
 
@@ -56,9 +55,4 @@ export function mean(values: (number | null | undefined)[]): number | null {
     }
   }
   return n ? sum / n : null;
-}
-
-/** Reduce long ranges to at most ~`max` points by averaging consecutive chunks. */
-export function bucketSize(count: number, max = 320): number {
-  return Math.max(1, Math.ceil(count / max));
 }

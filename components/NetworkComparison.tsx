@@ -1,10 +1,7 @@
 "use client";
 
-import { fmtDate, fmtPrice } from "@/lib/format";
 import { discountAmount, type Discounts } from "@/lib/discounts";
 import type { PriceEntry } from "@/lib/data";
-import { FUEL_LABELS, type Fuel, type Region } from "@/lib/types";
-import { REGION_LABELS } from "./constants";
 
 export interface PricedEntry extends PriceEntry {
   price: number;
@@ -30,71 +27,46 @@ export function applyDiscounts(entries: PriceEntry[], discounts: Discounts): { p
 }
 
 interface Props {
-  fuel: Fuel;
-  region: Region;
-  day: string | undefined;
   priced: PricedEntry[];
   missing: PriceEntry[];
-  all: boolean;
-  onAll: (v: boolean) => void;
+  isLive?: boolean;
 }
 
 /** Bar length relative to the min..max range so differences stay visible. */
 function barWidth(eff: number, min: number, max: number): number {
-  return max > min ? 12 + (88 * (eff - min)) / (max - min) : 12;
+  return max > min ? 8 + (92 * (eff - min)) / (max - min) : 8;
 }
 
-export function NetworkComparison({ fuel, region, day, priced, missing, all, onAll }: Props) {
+const nf = new Intl.NumberFormat("uk-UA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+export function NetworkComparison({ priced, missing, isLive }: Props) {
   const min = priced[0]?.eff ?? 0;
   const max = priced.at(-1)?.eff ?? 0;
   return (
-    <section className="card" aria-labelledby="nets-h">
-      <div className="card-head">
-        <h2 id="nets-h">Де дешевше зараз</h2>
-        <label className="check">
-          <input type="checkbox" checked={all} onChange={(e) => onAll(e.target.checked)} />
-          усі мережі
-        </label>
-      </div>
-      <p className="muted small">
-        {FUEL_LABELS[fuel]}, {REGION_LABELS[region]}
-        {day ? `, станом на ${fmtDate(day)}` : ""}. Довжина смуги — відносно найдешевшої.
-      </p>
+    <section className="block" aria-labelledby="nets-h">
+      <h2 id="nets-h">Де дешевше</h2>
+      {isLive && <p className="muted small">Живі ціни з сайтів мереж</p>}
       {priced.length === 0 ? (
         <p className="empty">Немає даних.</p>
       ) : (
-        <ol className="bars">
+        <ol className="rank">
           {priced.map((e) => (
             <li key={e.slug} className={e.eff === min ? "is-min" : undefined}>
-              <span className="bar-name" title={e.brand ? `${e.name}: ${e.brand}` : undefined}>
+              <span className="rank-name" title={e.brand ? `${e.name}: ${e.brand}` : undefined}>
                 {e.name}
               </span>
-              <span className="bar-track" aria-hidden="true">
-                <span className="bar-fill" style={{ width: `${barWidth(e.eff, min, max)}%` }} />
+              <span className="rank-price">
+                {e.discount > 0 && <s className="muted small">{nf.format(e.price)}</s>} {nf.format(e.eff)}
               </span>
-              <span className="bar-price">
-                <b>{fmtPrice(e.eff)}</b>
-                {e.discount > 0 && (
-                  <span className="bar-orig muted">
-                    <s>{fmtPrice(e.price)}</s> −{fmtPrice(e.discount)} знижка
-                  </span>
-                )}
+              <span className="rank-diff muted small">{e.eff === min ? "" : `+${nf.format(e.eff - min)}`}</span>
+              <span className="rank-bar" aria-hidden="true">
+                <i style={{ width: `${barWidth(e.eff, min, max)}%` }} />
               </span>
-              <span className="bar-diff muted">{e.eff === min ? "найдешевше" : `+${fmtPrice(e.eff - min)} від найдешевшої`}</span>
             </li>
           ))}
         </ol>
       )}
-      {missing.length > 0 && (
-        <ul className="bars-missing muted">
-          {missing.map((e) => (
-            <li key={e.slug}>
-              <span>{e.name}</span>
-              <span>немає даних</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {missing.length > 0 && <p className="muted small">Немає даних: {missing.map((e) => e.name).join(", ")}</p>}
     </section>
   );
 }

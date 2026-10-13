@@ -1,16 +1,16 @@
 import { fmtPrice } from "@/lib/format";
 import { addDays } from "@/lib/period";
 import { valueAtOrBefore, type AverageSeries } from "@/lib/data";
-import { FUEL_LABELS, type Fuel } from "@/lib/types";
+import { FUEL_LABELS, type Fuel, type Region } from "@/lib/types";
 import { Delta, changeOf } from "./Delta";
-import { REGION_LABELS } from "./constants";
+import { REGION_IN } from "./constants";
 import type { PricedEntry } from "./NetworkComparison";
-import type { Region } from "@/lib/types";
 
 interface Props {
   fuel: Fuel;
   region: Region;
-  best: PricedEntry | undefined;
+  /** Cheapest entries (ties included), best first. */
+  best: PricedEntry[];
   averages: AverageSeries;
 }
 
@@ -20,27 +20,32 @@ export function Hero({ fuel, region, best, averages }: Props) {
   const now = col && last ? valueAtOrBefore(averages.dates, col, last) : null;
   const week = col && last ? changeOf(now, valueAtOrBefore(averages.dates, col, addDays(last, -7))) : null;
   return (
-    <section className="card hero" aria-label="Найкращі ціни">
-      <p className="hero-best">
-        <span className="muted">Найвигідніше для тебе:</span>{" "}
-        {best ? (
-          <>
-            <b>{best.name}</b> <b className="hero-price">{fmtPrice(best.eff)}</b>
-            {best.brand && <span className="muted small"> {best.brand}</span>}
-          </>
-        ) : (
-          <span className="muted">немає даних по {FUEL_LABELS[fuel]}</span>
-        )}
-      </p>
-      <div className="kpi-row">
-        <div className="kpi-line">
-          <span className="kpi-label">Середня, {REGION_LABELS[region]}</span>
-          <span className="kpi-value">{now != null ? fmtPrice(now) : "—"}</span>
-          <span className="kpi-week">
-            {week && <Delta abs={week.abs} pct={null} showPct={false} />} {week?.abs != null && <span className="muted">за тиждень</span>}
-          </span>
-        </div>
-      </div>
+    <section className="hero" aria-label="Найкраща ціна">
+      {best.length ? (
+        <p className="hero-best">
+          <span className="muted">Найвигідніше:</span> <b>{best.map((b) => b.name).join(", ")}</b> — <b>{fmtPrice(best[0].eff)}</b>
+          {best[0].brand && best.length === 1 && <span className="muted small"> {best[0].brand}</span>}
+        </p>
+      ) : (
+        <p className="hero-best muted">Немає даних по {FUEL_LABELS[fuel]}</p>
+      )}
+      {now != null && (
+        <p className="muted small">
+          Середня {REGION_IN[region]} {fmtPrice(now)}
+          {week?.abs != null && (
+            <>
+              {" · "}
+              {Math.abs(week.abs) < 0.005 ? (
+                "без змін за тиждень"
+              ) : (
+                <>
+                  <Delta abs={week.abs} pct={null} showPct={false} /> за тиждень
+                </>
+              )}
+            </>
+          )}
+        </p>
+      )}
     </section>
   );
 }

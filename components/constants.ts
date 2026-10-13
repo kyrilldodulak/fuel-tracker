@@ -28,6 +28,11 @@ export const REGION_LABELS: Record<Region, string> = {
   kyiv: "Київська обл.",
 };
 
+export const REGION_IN: Record<Region, string> = {
+  ua: "по Україні",
+  kyiv: "по Київській обл.",
+};
+
 export const BASE_LABELS: Record<string, string> = {
   "92": "А-92",
   "95": "А-95",

@@ -23,6 +23,7 @@
   - UPG `upg.ua/cini-na-palne/` — inline `var obj = {data:[{RegionName, Title, AveragePrice}]}`, берём «Київська».
   - БРСМ-Нафта, Укрнафта — свои сайты за Cloudflare (403) → фолбэк на `minfin /ua/markets/fuel/tm/<slug>/`.
   - Укрнафта ДП+ (премиум-дизель) есть только в ежедневной статье Главкома «Ціни на АЗС <дата>» (таблица, строка по `alt="UKRNAFTA"`); URL статьи ищется на `glavcom.ua/economics/personal-money/`. Хрупко: при поломке адаптер молча падает на minfin (без ДП+).
+  - Архив Главкома → история ДП+/А95+ по сетям: `npm run backfill:glavcom` (месячные sitemap `glavcom.ua/pub/sitemaps/YYYY-MM.xml.gz`, ~1 req/s; `/archive.html` и `?page=` не годятся — robots/не работает). Статьи есть только с 2026-03-10; дата — из заголовка; пишутся только недостающие `dtp`/`a95p` в `networks.ua` (minfin не перезаписывается) + `averages.ua/kyiv[день].dtp` = среднее ≥2 сетей (kyiv — только если есть `networks.kyiv[день]`). Те же данные добавляет ежедневный `scrape` (`glavcom:today`). Ячейки со стрелками/«-» учитываются; KLO и прочие сети пропускаются.
   - **Shell в Украине больше нет** — не добавлять.
 - Премиум: храним **брендовые названия как есть** + `base` (95/100/diesel/…) + `premium` флаг (`scraper/normalize.ts`).
 

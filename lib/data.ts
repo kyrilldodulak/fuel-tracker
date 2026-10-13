@@ -51,8 +51,6 @@ const networks = networksRaw as unknown as NetworksFile;
 const brands = brandsRaw as unknown as BrandsFile;
 export const meta = metaRaw as unknown as MetaFile;
 
-const REGIONS: Region[] = ["ua", "kyiv"];
-
 /** Brand-derived fuels: premium diesel (dtp) and premium 95 (a95p), when minfin lacks them. */
 const BRAND_FUELS: { fuel: Fuel; base: BrandPrice["base"] }[] = [
   { fuel: "dtp", base: "diesel" },
@@ -90,51 +88,79 @@ function withBrandFuels(region: Region): { avg: Record<Day, FuelPrices>; net: Re
   return { avg, net };
 }
 
+/** Days of history kept at daily resolution; older days are averaged into weeks at build time. */
+const DAILY_WINDOW = 365;
+const WEEK_MS = 7 * 86_400_000;
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Weekly averages (dated by the first day present) for days older than the daily window. */
+function downsample(dates: Day[], cols: Column[]): { dates: Day[]; cols: Column[] } {
+  const last = dates.at(-1);
+  if (!last) return { dates, cols };
+  const cutoff = new Date(Date.parse(`${last}T00:00:00Z`) - DAILY_WINDOW * 86_400_000).toISOString().slice(0, 10);
+  const outDates: Day[] = [];
+  const sums: { sum: number; n: number }[][] = cols.map(() => []);
+  let bucket = -1;
+  let bucketIdx = -1;
+  dates.forEach((d, i) => {
+    const weekly = d < cutoff;
+    const b = weekly ? Math.floor(Date.parse(`${d}T00:00:00Z`) / WEEK_MS) : -2 - i;
+    if (b !== bucket) {
+      bucket = b;
+      bucketIdx++;
+      outDates.push(d);
+    }
+    cols.forEach((col, c) => {
+      const v = col[i];
+      if (v == null) return;
+      const acc = (sums[c][bucketIdx] ??= { sum: 0, n: 0 });
+      acc.sum += v;
+      acc.n++;
+    });
+  });
+  const outCols = cols.map((_, c) => outDates.map((__, k) => (sums[c][k] ? round2(sums[c][k].sum / sums[c][k].n) : null)));
+  return { dates: outDates, cols: outCols };
+}
+
 function shapeAverages(region: Region): AverageSeries {
   const byDay = withBrandFuels(region).avg;
-  const dates = Object.keys(byDay).sort();
+  const days = Object.keys(byDay).sort();
+  const present = FUELS.filter((f) => days.some((d) => byDay[d]?.[f] != null));
+  const ds = downsample(days, present.map((f) => days.map((d) => byDay[d]?.[f] ?? null)));
   const fuels: FuelColumns = {};
-  for (const f of FUELS) {
-    const col = dates.map((d) => byDay[d]?.[f] ?? null);
-    if (col.some((v) => v != null)) fuels[f] = col;
-  }
-  return { dates, fuels };
+  present.forEach((f, i) => (fuels[f] = ds.cols[i]));
+  return { dates: ds.dates, fuels };
 }
 
 function shapeNetworks(region: Region): NetworkSeries {
   const byDay = withBrandFuels(region).net;
-  const dates = Object.keys(byDay).sort();
-  const bySlug: Record<string, FuelColumns> = {};
-  dates.forEach((d, i) => {
-    for (const [slug, prices] of Object.entries(byDay[d])) {
-      const cols = (bySlug[slug] ??= {});
-      for (const f of FUELS) {
-        const v = prices[f];
-        if (v == null) continue;
-        (cols[f] ??= dates.map(() => null))[i] = v;
-      }
+  const days = Object.keys(byDay).sort();
+  const keys: { slug: string; fuel: Fuel; col: Column }[] = [];
+  for (const { slug } of TRACKED_NETWORKS) {
+    for (const fuel of FUELS) {
+      const col = days.map((d) => byDay[d][slug]?.[fuel] ?? null);
+      if (col.some((v) => v != null)) keys.push({ slug, fuel, col });
     }
-  });
-  return { dates, bySlug };
+  }
+  const ds = downsample(days, keys.map((k) => k.col));
+  const bySlug: Record<string, FuelColumns> = {};
+  keys.forEach((k, i) => ((bySlug[k.slug] ??= {})[k.fuel] = ds.cols[i]));
+  return { dates: ds.dates, bySlug };
 }
 
 export function networkLabel(slug: string, names: Record<string, string>): string {
   return names[slug] ?? slug;
 }
 
-function buildNetworkNames(slugs: Iterable<string>): Record<string, string> {
-  const names: Record<string, string> = {};
-  for (const s of slugs) names[s] = s.replace(/_/g, " ").toUpperCase();
-  for (const n of TRACKED_NETWORKS) names[n.slug] = n.name;
-  return names;
+function buildNetworkNames(): Record<string, string> {
+  return Object.fromEntries(TRACKED_NETWORKS.map((n) => [n.slug, n.name]));
 }
 
 export function loadDashboardData(): DashboardData {
   const avg = { ua: shapeAverages("ua"), kyiv: shapeAverages("kyiv") };
   const net = { ua: shapeNetworks("ua"), kyiv: shapeNetworks("kyiv") };
-  const slugs = new Set<string>();
-  for (const r of REGIONS) Object.keys(net[r].bySlug).forEach((s) => slugs.add(s));
-  const names = buildNetworkNames(slugs);
+  const names = buildNetworkNames();
 
   const brandDays = Object.keys(brands).sort();
   const brandsDay = brandDays.at(-1) ?? null;
@@ -182,22 +208,18 @@ export interface PriceEntry {
 
 const PREMIUM_BASE: Partial<Record<Fuel, BrandPrice["base"]>> = { dtp: "diesel", a95p: "95" };
 
-/** Latest shelf prices of `fuel` per network (tracked ones always listed, others only with `all`). */
+/** Latest shelf prices of `fuel` for every tracked network (price null when it lacks the fuel). */
 export function priceEntries(
   series: NetworkSeries,
   names: Record<string, string>,
   fuel: Fuel,
-  all: boolean,
   brands: NetworkBrands[],
 ): PriceEntry[] {
   const i = series.dates.length - 1;
-  const tracked = TRACKED_NETWORKS.map((n) => n.slug);
-  const slugs = all ? [...tracked, ...Object.keys(series.bySlug).filter((s) => !tracked.includes(s))] : tracked;
   const base = PREMIUM_BASE[fuel];
-  return slugs.flatMap((slug) => {
+  return TRACKED_NETWORKS.map(({ slug }) => {
     const price = series.bySlug[slug]?.[fuel]?.[i] ?? null;
-    if (price == null && !tracked.includes(slug)) return [];
     const item = base && price != null ? cheapestPremium(brands.find((b) => b.slug === slug)?.items, base) : null;
-    return [{ slug, name: networkLabel(slug, names), price, brand: item?.price === price ? item.name : undefined }];
+    return { slug, name: networkLabel(slug, names), price, brand: item?.price === price ? item.name : undefined };
   });
 }
