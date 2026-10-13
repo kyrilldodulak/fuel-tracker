@@ -1,70 +1,133 @@
 import { fmtDate, fmtPrice } from "@/lib/format";
-import type { NetworkBrands } from "@/lib/data";
+import { cheapestPremium, type NetworkBrands } from "@/lib/data";
 import type { BrandPrice } from "@/lib/types";
-import { Delta, changeOf } from "./Delta";
-import { BASE_LABELS } from "./constants";
 
 interface Props {
   day: string | null;
   brands: NetworkBrands[];
 }
 
-/** Regular fuel of the same base; premium 98/100 fall back to regular А-95. */
-function reference(items: BrandPrice[], b: BrandPrice): { price: number; label: string } | null {
-  const regular = items.filter((i) => !i.premium);
-  const same = regular.find((i) => i.base === b.base);
-  if (same) return { price: same.price, label: BASE_LABELS[b.base] };
-  if (b.base === "98" || b.base === "100") {
-    const a95 = regular.find((i) => i.base === "95");
-    if (a95) return { price: a95.price, label: BASE_LABELS["95"] };
-  }
-  return null;
+type Base = BrandPrice["base"];
+
+const COLUMNS: { base: Base; premium: boolean; label: string }[] = [
+  { base: "95", premium: false, label: "А-95" },
+  { base: "95", premium: true, label: "А-95 преміум" },
+  { base: "diesel", premium: false, label: "ДП" },
+  { base: "diesel", premium: true, label: "ДП преміум" },
+];
+
+/** "95 Mustang Євро5-Е10" -> "Mustang", "ДП Mustang+" -> "Mustang+", "NANO ДП" -> "Nano ДП". */
+export function shortBrandName(name: string): string {
+  const s = name
+    .replace(/\s*Євро\s?\d*[-–]?Е?\d*\s*$/i, "")
+    .replace(/^(ДП|Бензин|DIESEL|\d{2,3})\s+(?=\S)/i, "")
+    .replace(/\bNANO\b/, "Nano")
+    .trim();
+  return s || name;
 }
 
-function BrandRow({ item, items }: { item: BrandPrice; items: BrandPrice[] }) {
-  const ref = item.premium ? reference(items, item) : null;
-  const c = ref ? changeOf(item.price, ref.price) : null;
-  return (
-    <li className="brand-row">
-      <div className="brand-main">
-        <b>{item.name}</b>
-        <span className="muted small">{BASE_LABELS[item.base] ?? item.base}</span>
-        {item.premium && <span className="badge">преміум</span>}
-      </div>
-      <div className="brand-price">
-        <b>{fmtPrice(item.price)}</b>
-        {c && ref && (
-          <span className="small">
-            <span className="muted">до {ref.label}: </span>
-            <Delta abs={c.abs} pct={c.pct} />
-          </span>
-        )}
-      </div>
-    </li>
-  );
+/** "100 Mustang Євро5-Е0" → "Mustang 100"; "UPG 100" (network UPG) → "100". */
+function hundredLabel(name: string, network: string): string {
+  const brand = shortBrandName(name).replace(/\b100\b/, "").replace(new RegExp(`^${network}\\b`, "i"), "").trim();
+  return brand ? `${brand} 100` : "100";
+}
+
+const nf = new Intl.NumberFormat("uk-UA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function regularOf(items: BrandPrice[], base: Base): number | null {
+  const r = items.filter((i) => !i.premium && i.base === base);
+  return r.length ? Math.min(...r.map((i) => i.price)) : null;
+}
+
+interface Cell {
+  price: number;
+  brand?: BrandPrice;
+  markup?: number;
+}
+
+function cellOf(items: BrandPrice[], base: Base, premium: boolean): Cell | null {
+  if (!premium) {
+    const price = regularOf(items, base);
+    return price == null ? null : { price };
+  }
+  const brand = cheapestPremium(items, base);
+  if (!brand) return null;
+  const reg = regularOf(items, base);
+  return { price: brand.price, brand, markup: reg == null ? undefined : brand.price - reg };
 }
 
 export function PremiumBrands({ day, brands }: Props) {
+  const rows = brands.map((n) => ({
+    n,
+    cells: COLUMNS.map((c) => cellOf(n.items, c.base, c.premium)),
+  }));
+  const mins = COLUMNS.map((_, ci) => {
+    const ps = rows.map((r) => r.cells[ci]?.price).filter((p): p is number => p != null);
+    return ps.length > 1 ? Math.min(...ps) : null;
+  });
+  const hundreds = brands
+    .map((n) => ({ n, item: cheapestPremium(n.items, "100") }))
+    .filter((x): x is { n: NetworkBrands; item: BrandPrice } => x.item != null);
+
   return (
     <section className="card" aria-labelledby="brands-h">
       <h2 id="brands-h">Преміум-лінійки мереж</h2>
       <p className="muted small">
-        Ціни з сайтів мереж{day ? ` на ${fmtDate(day)}` : ""}. Націнка — відносно звичайного пального тієї ж мережі.
+        Ціни з сайтів мереж{day ? ` на ${fmtDate(day)}` : ""}. Під ціною — бренд і націнка до звичайного.
       </p>
-      <div className="brands-grid">
-        {brands.map((n) => (
-          <article key={n.slug} className="brand-card">
-            <h3>{n.name}</h3>
-            <ul>
-              {[...n.items]
-                .sort((a, b) => Number(b.premium) - Number(a.premium) || a.base.localeCompare(b.base) || a.price - b.price)
-                .map((it) => (
-                  <BrandRow key={`${it.name}-${it.base}`} item={it} items={n.items} />
+      <div className="table-wrap prem-wrap">
+        <table className="prem-table">
+          <thead>
+            <tr>
+              <th scope="col">Мережа</th>
+              {COLUMNS.map((c) => (
+                <th key={c.label} scope="col" className="num">
+                  {c.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ n, cells }) => (
+              <tr key={n.slug}>
+                <th scope="row">{n.name}</th>
+                {cells.map((c, ci) => (
+                  <td key={ci} className="num">
+                    {c ? (
+                      <>
+                        <span className={c.price === mins[ci] ? "prem-min" : undefined}>{nf.format(c.price)}</span>
+                        {c.brand && (
+                          <span className="prem-sub muted" title={c.brand.name}>
+                            {shortBrandName(c.brand.name)}
+                            {c.markup != null && ` +${nf.format(Math.max(c.markup, 0))}`}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
+                  </td>
                 ))}
-            </ul>
-          </article>
-        ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+      {hundreds.length > 0 && (
+        <details className="table-view">
+          <summary>100-й бензин</summary>
+          <ul className="prem-100">
+            {hundreds.map(({ n, item }) => (
+              <li key={n.slug}>
+                <span>
+                  {n.name} <span className="muted" title={item.name}>{hundredLabel(item.name, n.name)}</span>
+                </span>
+                <b>{fmtPrice(item.price)}</b>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
