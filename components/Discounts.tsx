@@ -1,7 +1,6 @@
 "use client";
 
-import { DISCOUNT_NETWORKS, parseAmount, type Discount, type DiscountUnit, type Discounts } from "@/lib/discounts";
-import { Fold } from "./Fold";
+import { DISCOUNT_NETWORKS, type Discount, type DiscountUnit, type Discounts } from "@/lib/discounts";
 import { discountOf } from "./useDiscounts";
 
 interface Props {
@@ -14,18 +13,10 @@ const UNITS: { key: DiscountUnit; label: string }[] = [
   { key: "pct", label: "%" },
 ];
 
-/** "ОККО −2 ₴, WOG −3%" for the networks with a discount set. */
-function summarize(discounts: Discounts): string {
-  return DISCOUNT_NETWORKS.flatMap((n) => {
-    const d = discountOf(discounts, n.slug);
-    const amount = parseAmount(d.value);
-    return amount > 0 ? [`${n.name} −${amount.toLocaleString("uk-UA")}${d.unit === "pct" ? "%" : " ₴"}`] : [];
-  }).join(", ");
-}
-
 export function DiscountsCard({ discounts, onChange }: Props) {
   return (
-    <Fold title="Мої знижки" hint={summarize(discounts)}>
+    <section className="block" aria-labelledby="disc-h">
+      <h2 id="disc-h">Мої знижки</h2>
       <div className="disc-grid">
         {DISCOUNT_NETWORKS.map((n) => {
           const d = discountOf(discounts, n.slug);
@@ -54,6 +45,6 @@ export function DiscountsCard({ discounts, onChange }: Props) {
         })}
       </div>
       <p className="muted small">Знижка застосовується до цін цієї мережі в порівнянні нижче.</p>
-    </Fold>
+    </section>
   );
 }

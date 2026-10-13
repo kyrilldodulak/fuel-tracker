@@ -58,7 +58,7 @@ export function NetworkComparison({ priced, missing, isLive }: Props) {
               <span className="rank-price">
                 {e.discount > 0 && <s className="muted small">{nf.format(e.price)}</s>} {nf.format(e.eff)}
               </span>
-              <span className="rank-diff muted small">{e.eff === min ? "" : `+${nf.format(e.eff - min)}`}</span>
+              <span className="rank-diff muted small">{e.eff === min ? "найдешевше" : `+${nf.format(e.eff - min)} ₴ дорожче`}</span>
               <span className="rank-bar" aria-hidden="true">
                 <i style={{ width: `${barWidth(e.eff, min, max)}%` }} />
               </span>
