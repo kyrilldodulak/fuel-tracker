@@ -477,7 +477,7 @@
     "base": "lpg",
     "name": "LPG",
     "premium": false,
-    "price": 48.9
+    "price": 49.9
    }
   ],
   "ukrnafta": [
@@ -515,7 +515,7 @@
     "base": "lpg",
     "name": "Газ автомобільний",
     "premium": false,
-    "price": 45.9
+    "price": 46.9
    }
   ],
   "upg": [
@@ -535,7 +535,7 @@
     "base": "lpg",
     "name": "Газ",
     "premium": false,
-    "price": 48.82
+    "price": 48.9
    },
    {
     "base": "diesel",
