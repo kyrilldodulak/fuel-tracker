@@ -1841,7 +1841,7 @@
     "base": "diesel",
     "name": "Дизельне паливо",
     "premium": false,
-    "price": 99.9
+    "price": 100.9
    }
   ],
   "upg": [
