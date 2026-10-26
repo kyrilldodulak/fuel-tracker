@@ -2541,13 +2541,13 @@
     "base": "diesel",
     "name": "DIESEL NANO Extro",
     "premium": true,
-    "price": 109
+    "price": 110
    },
    {
     "base": "diesel",
     "name": "NANO ДП",
     "premium": true,
-    "price": 106
+    "price": 107
    },
    {
     "base": "95",
@@ -2603,7 +2603,7 @@
     "base": "lpg",
     "name": "Газ автомобільний",
     "premium": false,
-    "price": 50.9
+    "price": 52.9
    }
   ],
   "upg": [
