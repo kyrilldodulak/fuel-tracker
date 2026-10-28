@@ -2975,13 +2975,13 @@
     "base": "diesel",
     "name": "Дизельне паливо",
     "premium": false,
-    "price": 101.9
+    "price": 102.9
    },
    {
     "base": "lpg",
     "name": "Газ автомобільний",
     "premium": false,
-    "price": 53.9
+    "price": 54.9
    }
   ],
   "upg": [
