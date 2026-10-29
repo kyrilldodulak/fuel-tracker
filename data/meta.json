@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-29T09:22:41.299Z",
+ "lastUpdated": "2026-10-29T17:18:40.566Z",
  "sources": {
   "backfill:archive": {
    "at": "2026-10-13T13:13:21.666Z",
@@ -47,22 +47,22 @@
    "ok": true
   },
   "glavcom:today": {
-   "at": "2026-10-29T09:22:40.516Z",
+   "at": "2026-10-29T17:18:39.500Z",
    "count": 5,
    "ok": true
   },
   "minfin:kyiv": {
-   "at": "2026-10-29T09:22:34.208Z",
+   "at": "2026-10-29T17:17:53.821Z",
    "count": 17,
    "ok": true
   },
   "minfin:networks": {
-   "at": "2026-10-29T09:22:33.690Z",
+   "at": "2026-10-29T17:17:53.231Z",
    "count": 35,
    "ok": true
   },
   "minfin:ua": {
-   "at": "2026-10-29T09:22:33.139Z",
+   "at": "2026-10-29T17:17:52.594Z",
    "count": 5,
    "ok": true
   },
@@ -72,28 +72,28 @@
    "ok": true
   },
   "site:okko": {
-   "at": "2026-10-29T09:22:36.736Z",
+   "at": "2026-10-29T17:18:32.340Z",
    "count": 6,
    "ok": true
   },
   "site:socar": {
-   "at": "2026-10-29T09:22:37.554Z",
+   "at": "2026-10-29T17:18:33.377Z",
    "count": 6,
    "ok": true
   },
   "site:ukrnafta": {
-   "at": "2026-10-29T09:22:34.798Z",
+   "at": "2026-10-29T17:17:54.498Z",
    "count": 6,
    "ok": true
   },
   "site:upg": {
-   "at": "2026-10-29T09:22:38.826Z",
+   "at": "2026-10-29T17:18:35.372Z",
    "count": 6,
    "ok": true
   },
   "site:wog": {
-   "at": "2026-10-29T09:22:36.206Z",
-   "error": "no prices parsed",
+   "at": "2026-10-29T17:17:56.364Z",
+   "error": "fetch failed",
    "ok": false
   }
  }
