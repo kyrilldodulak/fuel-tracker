@@ -3486,6 +3486,44 @@
   ]
  },
  "2026-11-01": {
+  "okko": [
+   {
+    "base": "100",
+    "name": "Pulls 100",
+    "premium": true,
+    "price": 102.9
+   },
+   {
+    "base": "diesel",
+    "name": "Pulls Diesel",
+    "premium": true,
+    "price": 109.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП",
+    "premium": false,
+    "price": 106.9
+   },
+   {
+    "base": "95",
+    "name": "Pulls 95",
+    "premium": true,
+    "price": 95.9
+   },
+   {
+    "base": "95",
+    "name": "A-95",
+    "premium": false,
+    "price": 92.9
+   },
+   {
+    "base": "lpg",
+    "name": "Газ",
+    "premium": false,
+    "price": 59.9
+   }
+  ],
   "socar": [
    {
     "base": "100",
