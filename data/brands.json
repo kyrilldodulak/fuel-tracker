@@ -4195,19 +4195,19 @@
     "base": "95",
     "name": "А-95 преміум",
     "premium": true,
-    "price": 91.9
+    "price": 90.9
    },
    {
     "base": "95",
     "name": "А-95",
     "premium": false,
-    "price": 88.9
+    "price": 87.9
    },
    {
     "base": "92",
     "name": "А-92",
     "premium": false,
-    "price": 86.9
+    "price": 85.9
    }
   ],
   "upg": [
