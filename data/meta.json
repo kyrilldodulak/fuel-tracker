@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-11-06T10:25:42.252Z",
+ "lastUpdated": "2026-11-06T17:48:23.144Z",
  "sources": {
   "backfill:archive": {
    "at": "2026-10-13T13:13:21.666Z",
@@ -47,22 +47,22 @@
    "ok": true
   },
   "glavcom:today": {
-   "at": "2026-11-06T10:25:41.254Z",
-   "count": 5,
+   "at": "2026-11-06T17:48:21.837Z",
+   "count": 0,
    "ok": true
   },
   "minfin:kyiv": {
-   "at": "2026-11-06T10:25:30.417Z",
+   "at": "2026-11-06T17:48:14.195Z",
    "error": "minfin: averages table/date not found",
    "ok": false
   },
   "minfin:networks": {
-   "at": "2026-11-06T10:25:29.763Z",
+   "at": "2026-11-06T17:48:13.543Z",
    "error": "minfin: networks table/date not found",
    "ok": false
   },
   "minfin:ua": {
-   "at": "2026-11-06T10:25:29.215Z",
+   "at": "2026-11-06T17:48:12.973Z",
    "error": "minfin: averages table/date not found",
    "ok": false
   },
@@ -72,27 +72,27 @@
    "ok": true
   },
   "site:okko": {
-   "at": "2026-11-06T10:25:33.678Z",
-   "error": "HTTP 403 for https://www.okko.ua/fuels",
-   "ok": false
+   "at": "2026-11-06T17:48:17.612Z",
+   "count": 6,
+   "ok": true
   },
   "site:socar": {
-   "at": "2026-11-06T10:25:38.562Z",
+   "at": "2026-11-06T17:48:18.496Z",
    "count": 6,
    "ok": true
   },
   "site:ukrnafta": {
-   "at": "2026-11-06T10:25:31.039Z",
+   "at": "2026-11-06T17:48:14.863Z",
    "count": 6,
    "ok": true
   },
   "site:upg": {
-   "at": "2026-11-06T10:25:39.534Z",
+   "at": "2026-11-06T17:48:19.697Z",
    "count": 6,
    "ok": true
   },
   "site:wog": {
-   "at": "2026-11-06T10:25:33.034Z",
+   "at": "2026-11-06T17:48:16.796Z",
    "error": "no prices parsed",
    "ok": false
   }
