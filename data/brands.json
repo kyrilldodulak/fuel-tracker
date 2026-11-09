@@ -4710,5 +4710,159 @@
     "price": 91.9
    }
   ]
+ },
+ "2026-11-09": {
+  "okko": [
+   {
+    "base": "100",
+    "name": "Pulls 100",
+    "premium": true,
+    "price": 102.9
+   },
+   {
+    "base": "diesel",
+    "name": "Pulls Diesel",
+    "premium": true,
+    "price": 109.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП",
+    "premium": false,
+    "price": 106.9
+   },
+   {
+    "base": "95",
+    "name": "Pulls 95",
+    "premium": true,
+    "price": 95.9
+   },
+   {
+    "base": "95",
+    "name": "A-95",
+    "premium": false,
+    "price": 92.9
+   },
+   {
+    "base": "lpg",
+    "name": "Газ",
+    "premium": false,
+    "price": 61.9
+   }
+  ],
+  "socar": [
+   {
+    "base": "100",
+    "name": "NANO 100",
+    "premium": true,
+    "price": 103
+   },
+   {
+    "base": "diesel",
+    "name": "DIESEL NANO Extro",
+    "premium": true,
+    "price": 110
+   },
+   {
+    "base": "diesel",
+    "name": "NANO ДП",
+    "premium": true,
+    "price": 107
+   },
+   {
+    "base": "95",
+    "name": "NANO 95",
+    "premium": true,
+    "price": 95.9
+   },
+   {
+    "base": "95",
+    "name": "Бензин А-95",
+    "premium": false,
+    "price": 92.9
+   },
+   {
+    "base": "lpg",
+    "name": "LPG",
+    "premium": false,
+    "price": 61.9
+   }
+  ],
+  "ukrnafta": [
+   {
+    "base": "95",
+    "name": "А-95",
+    "premium": false,
+    "price": 87.9
+   },
+   {
+    "base": "95",
+    "name": "А-95+",
+    "premium": true,
+    "price": 90.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП",
+    "premium": false,
+    "price": 103.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП+",
+    "premium": true,
+    "price": 105.9
+   },
+   {
+    "base": "92",
+    "name": "А-92",
+    "premium": false,
+    "price": 85.9
+   },
+   {
+    "base": "lpg",
+    "name": "Газ",
+    "premium": false,
+    "price": 58.9
+   }
+  ],
+  "upg": [
+   {
+    "base": "diesel",
+    "name": "UPG Diesel",
+    "premium": true,
+    "price": 105.9
+   },
+   {
+    "base": "95",
+    "name": "A-95",
+    "premium": false,
+    "price": 88.9
+   },
+   {
+    "base": "lpg",
+    "name": "Газ",
+    "premium": false,
+    "price": 59.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП Euro",
+    "premium": false,
+    "price": 102.9
+   },
+   {
+    "base": "100",
+    "name": "UPG 100",
+    "premium": true,
+    "price": 100.9
+   },
+   {
+    "base": "95",
+    "name": "UPG 95",
+    "premium": true,
+    "price": 91.9
+   }
+  ]
  }
 }
