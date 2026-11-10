@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-11-10T10:47:38.243Z",
+ "lastUpdated": "2026-11-10T18:28:28.345Z",
  "sources": {
   "backfill:archive": {
    "at": "2026-10-13T13:13:21.666Z",
@@ -47,24 +47,24 @@
    "ok": true
   },
   "glavcom:today": {
-   "at": "2026-11-10T10:47:36.998Z",
+   "at": "2026-11-10T18:28:27.246Z",
    "count": 5,
    "ok": true
   },
   "minfin:kyiv": {
-   "at": "2026-11-10T10:47:28.567Z",
-   "error": "minfin: averages table/date not found",
-   "ok": false
+   "at": "2026-11-10T18:28:16.460Z",
+   "count": 17,
+   "ok": true
   },
   "minfin:networks": {
-   "at": "2026-11-10T10:47:27.949Z",
-   "error": "minfin: networks table/date not found",
-   "ok": false
+   "at": "2026-11-10T18:28:15.766Z",
+   "count": 35,
+   "ok": true
   },
   "minfin:ua": {
-   "at": "2026-11-10T10:47:27.381Z",
-   "error": "minfin: averages table/date not found",
-   "ok": false
+   "at": "2026-11-10T18:28:14.858Z",
+   "count": 5,
+   "ok": true
   },
   "site:brsmnafta": {
    "at": "2026-10-13T14:29:44.383Z",
@@ -72,27 +72,27 @@
    "ok": true
   },
   "site:okko": {
-   "at": "2026-11-10T10:47:31.791Z",
+   "at": "2026-11-10T18:28:19.796Z",
    "count": 6,
    "ok": true
   },
   "site:socar": {
-   "at": "2026-11-10T10:47:32.714Z",
+   "at": "2026-11-10T18:28:20.680Z",
    "count": 6,
    "ok": true
   },
   "site:ukrnafta": {
-   "at": "2026-11-10T10:47:29.188Z",
+   "at": "2026-11-10T18:28:17.110Z",
    "count": 6,
    "ok": true
   },
   "site:upg": {
-   "at": "2026-11-10T10:47:34.719Z",
+   "at": "2026-11-10T18:28:22.592Z",
    "count": 6,
    "ok": true
   },
   "site:wog": {
-   "at": "2026-11-10T10:47:31.077Z",
+   "at": "2026-11-10T18:28:18.864Z",
    "error": "no prices parsed",
    "ok": false
   }

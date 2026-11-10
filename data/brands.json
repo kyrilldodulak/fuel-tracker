@@ -4871,7 +4871,7 @@
     "base": "100",
     "name": "Pulls 100",
     "premium": true,
-    "price": 102.9
+    "price": 101.9
    },
    {
     "base": "diesel",
@@ -4889,13 +4889,13 @@
     "base": "95",
     "name": "Pulls 95",
     "premium": true,
-    "price": 95.9
+    "price": 94.9
    },
    {
     "base": "95",
     "name": "A-95",
     "premium": false,
-    "price": 92.9
+    "price": 91.9
    },
    {
     "base": "lpg",
