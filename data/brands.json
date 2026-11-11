@@ -5113,25 +5113,25 @@
     "base": "95",
     "name": "А-95 преміум",
     "premium": true,
-    "price": 90.9
+    "price": 89.9
    },
    {
     "base": "95",
     "name": "А-95",
     "premium": false,
-    "price": 87.9
+    "price": 86.9
    },
    {
     "base": "92",
     "name": "А-92",
     "premium": false,
-    "price": 85.9
+    "price": 84.9
    },
    {
     "base": "lpg",
     "name": "Газ автомобільний",
     "premium": false,
-    "price": 58.9
+    "price": 59.9
    }
   ],
   "upg": [
@@ -5139,7 +5139,7 @@
     "base": "diesel",
     "name": "UPG Diesel",
     "premium": true,
-    "price": 105.9
+    "price": 104.9
    },
    {
     "base": "95",
@@ -5157,7 +5157,7 @@
     "base": "diesel",
     "name": "ДП Euro",
     "premium": false,
-    "price": 102.9
+    "price": 101.94
    },
    {
     "base": "100",
