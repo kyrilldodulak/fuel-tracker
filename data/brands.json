@@ -5273,13 +5273,13 @@
     "base": "diesel",
     "name": "Дизельне паливо",
     "premium": false,
-    "price": 103.9
+    "price": 102.9
    },
    {
     "base": "lpg",
     "name": "Газ автомобільний",
     "premium": false,
-    "price": 59.9
+    "price": 60.9
    }
   ],
   "upg": [
