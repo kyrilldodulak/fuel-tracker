@@ -6031,7 +6031,7 @@
     "base": "diesel",
     "name": "Дизельне паливо",
     "premium": false,
-    "price": 101.9
+    "price": 99.9
    },
    {
     "base": "lpg",
