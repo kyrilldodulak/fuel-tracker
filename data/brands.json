@@ -6199,13 +6199,13 @@
     "base": "diesel",
     "name": "UPG Diesel",
     "premium": true,
-    "price": 102.9
+    "price": 101.9
    },
    {
     "base": "95",
     "name": "A-95",
     "premium": false,
-    "price": 86.9
+    "price": 84.9
    },
    {
     "base": "lpg",
@@ -6229,7 +6229,7 @@
     "base": "95",
     "name": "UPG 95",
     "premium": true,
-    "price": 89.9
+    "price": 86.9
    }
   ]
  }
