@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-11-19T19:20:32.458Z",
+ "lastUpdated": "2026-11-20T10:56:29.401Z",
  "sources": {
   "backfill:archive": {
    "at": "2026-10-13T13:13:21.666Z",
@@ -47,22 +47,22 @@
    "ok": true
   },
   "glavcom:today": {
-   "at": "2026-11-19T19:20:31.241Z",
+   "at": "2026-11-20T10:56:28.300Z",
    "count": 5,
    "ok": true
   },
   "minfin:kyiv": {
-   "at": "2026-11-19T19:20:22.569Z",
+   "at": "2026-11-20T10:56:16.253Z",
    "count": 17,
    "ok": true
   },
   "minfin:networks": {
-   "at": "2026-11-19T19:20:21.665Z",
+   "at": "2026-11-20T10:56:15.483Z",
    "count": 35,
    "ok": true
   },
   "minfin:ua": {
-   "at": "2026-11-19T19:20:20.660Z",
+   "at": "2026-11-20T10:56:14.357Z",
    "count": 5,
    "ok": true
   },
@@ -72,27 +72,27 @@
    "ok": true
   },
   "site:okko": {
-   "at": "2026-11-19T19:20:26.240Z",
+   "at": "2026-11-20T10:56:19.764Z",
    "count": 6,
    "ok": true
   },
   "site:socar": {
-   "at": "2026-11-19T19:20:27.249Z",
+   "at": "2026-11-20T10:56:20.725Z",
    "count": 6,
    "ok": true
   },
   "site:ukrnafta": {
-   "at": "2026-11-19T19:20:23.348Z",
+   "at": "2026-11-20T10:56:16.995Z",
    "count": 6,
    "ok": true
   },
   "site:upg": {
-   "at": "2026-11-19T19:20:29.344Z",
-   "count": 6,
-   "ok": true
+   "at": "2026-11-20T10:56:22.374Z",
+   "error": "HTTP 500 for https://upg.ua/cini-na-palne/",
+   "ok": false
   },
   "site:wog": {
-   "at": "2026-11-19T19:20:25.454Z",
+   "at": "2026-11-20T10:56:18.956Z",
    "error": "no prices parsed",
    "ok": false
   }
