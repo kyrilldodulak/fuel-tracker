@@ -7413,6 +7413,44 @@
     "premium": false,
     "price": 95.9
    }
+  ],
+  "upg": [
+   {
+    "base": "diesel",
+    "name": "UPG Diesel",
+    "premium": true,
+    "price": 97.9
+   },
+   {
+    "base": "95",
+    "name": "A-95",
+    "premium": false,
+    "price": 80.9
+   },
+   {
+    "base": "lpg",
+    "name": "Газ",
+    "premium": false,
+    "price": 60.9
+   },
+   {
+    "base": "diesel",
+    "name": "ДП Euro",
+    "premium": false,
+    "price": 95.46
+   },
+   {
+    "base": "100",
+    "name": "UPG 100",
+    "premium": true,
+    "price": 93.9
+   },
+   {
+    "base": "95",
+    "name": "UPG 95",
+    "premium": true,
+    "price": 82.9
+   }
   ]
  }
 }
